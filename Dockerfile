@@ -18,4 +18,5 @@ RUN unzip -o log-agent.jar -d /app/agent
 EXPOSE 3000
 
 # 5. Run the Java agent using -cp (classpath) pointing to WEB-INF classes + start Node
-CMD ["/bin/sh", "-c", "java -cp '/app/agent/WEB-INF/classes:/app/agent/WEB-INF/lib/*' com.autoheal.agent.LogAgent --api-key=\"\" --log-file=/app/app.log --server-url=https://orange-memes-fetch.loca.lt/api/v1/logs/ingest & npm start > /app/app.log 2>&1"]
+# Replace ONLY the last line in your Dockerfile with this:
+CMD ["/bin/sh", "-c", "java -cp '/app/agent/WEB-INF/classes:/app/agent/WEB-INF/lib/*' com.autoheal.agent.LogAgent --api-key=${LOG_API_KEY} --log-file=/app/app.log --server-url=https://orange-memes-fetch.loca.lt/api/v1/logs/ingest & npm start > /app/app.log 2>&1"]
