@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log System Test Ground</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        button { display: block; width: 100%; padding: 12px; margin-bottom: 10px; cursor: pointer; background: #e74c3c; color: white; border: none; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #c0392b; }
+        .frontend { background: #f39c12; }
+        .frontend:hover { background: #d35400; }
+    </style>
+</head>
+<body>
+    <h1>Log System Test Ground</h1>
+    <p>Open your browser's Developer Tools (Console & Network tabs) and your server terminal.</p>
+    <h3>Backend Errors</h3>
+    <button onclick="triggerApi('/api/sync-error')">Trigger 500: Sync Error</button>
+    <button onclick="triggerApi('/api/async-error')">Trigger 500: Async Promise Rejection</button>
+    <button onclick="triggerApi('/api/file-error')">Trigger 500: File System (ENOENT)</button>
+    <button onclick="triggerApi('/api/parse-error')">Trigger 500: JSON Parse Error</button>
+    <button onclick="triggerApi('/api/missing-endpoint')">Trigger 404: Not Found</button>
+
+    <h3>Frontend Errors</h3>
+    <button class="frontend" onclick="triggerTypeError()">Trigger TypeError</button>
+    <button class="frontend" onclick="triggerReferenceError()">Trigger ReferenceError</button>
+
+    <script>
+        async function triggerApi(endpoint) {
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                console.error("Backend Error Response:", data);
+            } catch (err) {
+                console.error("Network request failed completely:", err);
+            }
+        }
+        function triggerTypeError() { const nullObject = null; console.log(nullObject.prop); }
+        function triggerReferenceError() { nonExistentFunctionCall(); }
+    </script>
+</body>
+</html>

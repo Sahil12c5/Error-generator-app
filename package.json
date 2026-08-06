@@ -1,0 +1,12 @@
+{
+  "name": "error-generator-app",
+  "version": "1.0.0",
+  "description": "Runnable app with intentional errors for log testing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
