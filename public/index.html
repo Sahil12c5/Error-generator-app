@@ -3,41 +3,413 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log System Test Ground</title>
+    <title>Nexus Electronics | Premium Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
-        button { display: block; width: 100%; padding: 12px; margin-bottom: 10px; cursor: pointer; background: #e74c3c; color: white; border: none; border-radius: 4px; font-weight: bold; }
-        button:hover { background: #c0392b; }
-        .frontend { background: #f39c12; }
-        .frontend:hover { background: #d35400; }
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg: #F9FAFB;
+            --surface: #FFFFFF;
+            --text-main: #111827;
+            --text-light: #6B7280;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .cart-btn {
+            background: var(--text-main);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .cart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 6rem 5%;
+            text-align: center;
+            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto 2rem auto;
+        }
+
+        /* Product Grid */
+        .products-section {
+            padding: 4rem 5%;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: var(--surface);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #E5E7EB;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-desc {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .product-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .add-to-cart {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .add-to-cart:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Demo Control Panel */
+        .demo-panel {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 320px;
+            z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .demo-panel h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .demo-badge {
+            background: var(--primary);
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .demo-btn {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .demo-btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-lag { background: #3B82F6; color: white; }
+        .btn-mem { background: #8B5CF6; color: white; }
+        .btn-freeze { background: #EF4444; color: white; }
+        .btn-other { background: #374151; color: white; }
+
+        #status-bar {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #9CA3AF;
+            text-align: center;
+            min-height: 1.2rem;
+        }
+        
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+            display: none;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
     </style>
 </head>
 <body>
-    <h1>Log System Test Ground</h1>
-    <p>Open your browser's Developer Tools (Console & Network tabs) and your server terminal.</p>
-    <h3>Backend Errors</h3>
-    <button onclick="triggerApi('/api/sync-error')">Trigger 500: Sync Error</button>
-    <button onclick="triggerApi('/api/async-error')">Trigger 500: Async Promise Rejection</button>
-    <button onclick="triggerApi('/api/file-error')">Trigger 500: File System (ENOENT)</button>
-    <button onclick="triggerApi('/api/parse-error')">Trigger 500: JSON Parse Error</button>
-    <button onclick="triggerApi('/api/missing-endpoint')">Trigger 404: Not Found</button>
 
-    <h3>Frontend Errors</h3>
-    <button class="frontend" onclick="triggerTypeError()">Trigger TypeError</button>
-    <button class="frontend" onclick="triggerReferenceError()">Trigger ReferenceError</button>
+    <nav>
+        <div class="logo">Nexus.</div>
+        <div class="nav-links">
+            <a href="#">Shop</a>
+            <a href="#">Categories</a>
+            <a href="#">Support</a>
+        </div>
+        <button class="cart-btn">Cart (0)</button>
+    </nav>
+
+    <div class="hero">
+        <h1>The Future of Tech.</h1>
+        <p>Discover our curated collection of premium electronics, designed to elevate your everyday workflow.</p>
+    </div>
+
+    <div class="products-section">
+        <h2 class="section-title">Trending Now</h2>
+        <div class="product-grid" id="productGrid">
+            <!-- Products will be injected here via JS -->
+            <p style="grid-column: 1/-1; text-align: center; color: #6B7280;">Loading products...</p>
+        </div>
+    </div>
+
+    <!-- Floating Demo Panel -->
+    <div class="demo-panel">
+        <h3>System Diagnostics <span class="demo-badge">Demo</span></h3>
+        <p style="font-size: 0.8rem; color: #9CA3AF; margin-bottom: 1rem;">Trigger specific server behaviors to test the Auto-Healing Engine.</p>
+        
+        <button class="demo-btn btn-lag" onclick="triggerAction('/api/error/lag', this)">
+            <span class="spinner"></span> Simulate High Traffic (CPU Lag)
+        </button>
+        <button class="demo-btn btn-mem" onclick="triggerAction('/api/error/memory', this)">
+            <span class="spinner"></span> Simulate Memory Leak (Heap Spike)
+        </button>
+        <button class="demo-btn btn-freeze" onclick="triggerAction('/api/error/freeze', this)">
+            <span class="spinner"></span> Trigger System Crash (Freeze)
+        </button>
+        
+        <div style="margin: 1rem 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
+        
+        <button class="demo-btn btn-other" onclick="triggerAction('/api/sync-error', this)">500 Sync DB Error</button>
+        <button class="demo-btn btn-other" onclick="triggerAction('/api/async-error', this)">500 Async Gateway Error</button>
+        
+        <div id="status-bar">System Online</div>
+    </div>
 
     <script>
-        async function triggerApi(endpoint) {
+        // Fetch and display products
+        async function loadProducts() {
             try {
-                const response = await fetch(endpoint);
-                const data = await response.json();
-                console.error("Backend Error Response:", data);
+                const res = await fetch('/api/products');
+                const products = await res.json();
+                
+                const grid = document.getElementById('productGrid');
+                grid.innerHTML = '';
+                
+                products.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <img src="${p.image}" alt="${p.name}" class="product-image">
+                        <div class="product-info">
+                            <h4 class="product-name">${p.name}</h4>
+                            <p class="product-desc">${p.description}</p>
+                            <div class="product-bottom">
+                                <span class="product-price">$${p.price.toFixed(2)}</span>
+                                <button class="add-to-cart" onclick="addToCart(${p.id}, this)">Add</button>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
             } catch (err) {
-                console.error("Network request failed completely:", err);
+                console.error("Failed to load products", err);
+                document.getElementById('productGrid').innerHTML = '<p style="color:red; grid-column:1/-1;">Error loading products. Is the server running?</p>';
             }
         }
-        function triggerTypeError() { const nullObject = null; console.log(nullObject.prop); }
-        function triggerReferenceError() { nonExistentFunctionCall(); }
+
+        // Dummy add to cart
+        function addToCart(id, btn) {
+            const originalText = btn.innerText;
+            btn.innerText = 'Added!';
+            btn.style.background = '#10B981';
+            
+            fetch('/api/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId: id })
+            });
+
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = '';
+            }, 2000);
+        }
+
+        // Trigger Demo Actions
+        async function triggerAction(endpoint, btn) {
+            const statusBar = document.getElementById('status-bar');
+            const spinner = btn.querySelector('.spinner');
+            
+            if (spinner) spinner.style.display = 'inline-block';
+            statusBar.innerText = 'Sending request...';
+            statusBar.style.color = '#F59E0B';
+            btn.style.opacity = '0.7';
+            btn.disabled = true;
+
+            const startTime = Date.now();
+
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json().catch(() => ({ status: 'error', message: 'Failed to parse JSON' }));
+                
+                const timeTaken = Date.now() - startTime;
+                
+                console.log("Action Response:", data);
+                statusBar.innerText = `Action completed in ${timeTaken}ms`;
+                statusBar.style.color = '#10B981';
+
+            } catch (err) {
+                console.error("Network request failed:", err);
+                statusBar.innerText = 'Connection refused or server frozen.';
+                statusBar.style.color = '#EF4444';
+            } finally {
+                if (spinner) spinner.style.display = 'none';
+                btn.style.opacity = '1';
+                btn.disabled = false;
+                
+                setTimeout(() => {
+                    if (statusBar.innerText.includes('completed')) {
+                        statusBar.innerText = 'System Online';
+                        statusBar.style.color = '#9CA3AF';
+                    }
+                }, 5000);
+            }
+        }
+
+        // Initialize
+        loadProducts();
     </script>
 </body>
 </html>
