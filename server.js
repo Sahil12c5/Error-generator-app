@@ -22,11 +22,11 @@ async function initDB() {
     while (retries > 0) {
         try {
             pool = mysql.createPool({
-                host: process.env.DB_HOST || 'localhost',
-                port: process.env.DB_PORT || 3306,
-                user: process.env.DB_USER || 'root',
-                password: process.env.DB_PASSWORD || '',
-                database: process.env.DB_NAME || 'nexus_store',
+                host: process.env.DB_HOST || 'error-generator-sahilchavan-ff75.h.aivencloud.com',
+                port: process.env.DB_PORT || 15953,
+                user: process.env.DB_USER || 'avnadmin',
+                password: process.env.DB_PASSWORD || 'your_password_here',
+                database: process.env.DB_NAME || 'defaultdb',
                 ssl: {
                     rejectUnauthorized: false
                 },
