@@ -119,9 +119,13 @@ app.get('/api/error/memory', (req, res) => {
         memoryLeakArray.push({ index: i, data: "A".repeat(1000) }); // Allocate ~500MB string data
     }
     const memoryUsage = process.memoryUsage();
+    
+    // Log the exact error pattern expected by AutoHeal
+    console.error("Fatal Memory Leak: OutOfMemoryError: Java heap space in Garbage Collector");
+    
     res.json({ 
         status: "success", 
-        message: "Memory leak spiked.", 
+        message: "Memory leak spiked and logged OutOfMemoryError.", 
         heapUsedMB: Math.round(memoryUsage.heapUsed / 1024 / 1024)
     });
 });
@@ -142,12 +146,12 @@ app.get('/api/error/freeze', (req, res) => {
 // --- ORIGINAL BASIC ERROR ENDPOINTS ---
 
 app.get('/api/sync-error', (req, res) => {
-    throw new Error("CRITICAL: Synchronous database connection failed!");
+    throw new Error("java.sql.SQLException: Connection pool exhausted");
 });
 
 app.get('/api/async-error', async (req, res, next) => {
     try {
-        await Promise.reject(new Error("FATAL: Unhandled Promise Rejection in payment gateway."));
+        await Promise.reject(new Error("RedisCacheException: Connection refused to Redis server"));
     } catch (error) {
         next(error);
     }
