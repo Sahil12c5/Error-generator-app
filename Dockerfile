@@ -19,4 +19,4 @@ EXPOSE 3000
 
 # 5. Run the Java agent using -cp (classpath) pointing to WEB-INF classes + start Node
 # Replace ONLY the last line in your Dockerfile with this:
-CMD ["/bin/sh", "-c", "java -cp '/app/agent' com.autoheal.agent.LogAgent --api-key=${LOG_API_KEY} --log-file=/app/app.log --server-url=${INGEST_URL} & npm start > /app/app.log 2>&1"]
+CMD ["/bin/sh", "-c", "java -cp '/app/agent' com.autoheal.agent.LogAgent --api-key=${LOG_API_KEY} --log-file=/app/app.log --server-url=${LOG_SERVER_URL}/api/v1/logs/ingest & npm start > /app/app.log 2>&1"]
