@@ -336,7 +336,7 @@
                             <h4 class="product-name">${p.name}</h4>
                             <p class="product-desc">${p.description}</p>
                             <div class="product-bottom">
-                                <span class="product-price">$${p.price.toFixed(2)}</span>
+                                <span class="product-price">$${parseFloat(p.price).toFixed(2)}</span>
                                 <button class="add-to-cart" onclick="addToCart(${p.id}, this)">Add</button>
                             </div>
                         </div>
