@@ -105,35 +105,39 @@ app.post('/api/cart/add', (req, res) => {
 
 // 1. CPU Lag Spike
 app.get('/api/error/lag', (req, res) => {
-    console.warn("⚠️ [COMPUTE_SPIKE] Heavy CPU load requested: Simulating 5-second blocking computation...");
+    console.error("⚠️ [CRITICAL] CPUStarvationException: Simulating heavy CPU computation blocking event loop...");
     const start = Date.now();
-    while (Date.now() - start < 5000) {
-        // Synchronous loop blocking Node event loop
+    // Synchronously block the event loop for 4 seconds to demonstrate high latency
+    while (Date.now() - start < 4000) {
+        Math.sqrt(Math.random() * 1000000);
     }
     const duration = Date.now() - start;
-    const logSnippet = `[WARN] EventLoopBlocked: Main thread was starved for ${duration}ms due to high CPU load.`;
-    console.warn(logSnippet);
-    res.json({
-        status: "success",
-        errorType: "HighLatencyWarning",
+    const logSnippet = `[CRITICAL] CPUStarvationException: EventLoopBlocked - Main thread CPU starved for ${duration}ms due to compute overload.`;
+    console.error(logSnippet);
+
+    res.status(503).json({
+        status: "error",
+        errorType: "CPUStarvationException",
         errorCode: "ERR_CPU_STARVATION",
-        statusCode: 200,
-        message: `CPU load simulation completed. Event loop blocked for ${duration}ms.`,
-        description: "A synchronous compute loop monopolizes the single-threaded Node.js event loop for 5s, causing latency spikes and starving concurrent requests.",
+        statusCode: 503,
+        message: `CPUStarvationException: Event loop was blocked for ${duration}ms.`,
+        description: "A synchronous compute loop monopolized the single-threaded Node.js event loop for 4s, causing latency spikes and starving concurrent requests.",
         durationMs: duration,
-        logSnippet
+        logSnippet,
+        stack: `CPUStarvationException: Event loop blocked for ${duration}ms\n    at computeHeavyWorkload (/app/server.js:115:15)\n    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)`
     });
 });
 
 // 2. Memory Leak (Heap Spike)
 app.get('/api/error/memory', (req, res) => {
-    console.warn("⚠️ [MEMORY_LEAK] Spiking memory allocation...");
-    for (let i = 0; i < 500000; i++) {
-        memoryLeakArray.push({ index: i, data: "A".repeat(1000) });
+    console.error("⚠️ [CRITICAL] Fatal Memory Leak: OutOfMemoryError: Java heap space in Garbage Collector");
+    // Allocate 30,000 objects (~25-30MB) safely to increase heap without crashing the process with OS SIGKILL
+    for (let i = 0; i < 30000; i++) {
+        memoryLeakArray.push({ index: i, timestamp: Date.now(), data: "X".repeat(1000) });
     }
     const mem = process.memoryUsage();
     const heapUsedMB = Math.round(mem.heapUsed / 1024 / 1024);
-    const logSnippet = `Fatal Memory Leak: OutOfMemoryError: Java heap space in Garbage Collector (Heap used: ${heapUsedMB}MB)`;
+    const logSnippet = `Fatal Memory Leak: OutOfMemoryError: Java heap space in Garbage Collector (Heap used: ${heapUsedMB}MB, Allocations: ${memoryLeakArray.length})`;
     console.error(logSnippet);
 
     res.status(500).json({
@@ -142,32 +146,38 @@ app.get('/api/error/memory', (req, res) => {
         errorCode: "ERR_HEAP_EXHAUSTED",
         statusCode: 500,
         message: "Fatal Memory Leak: OutOfMemoryError: Java heap space in Garbage Collector",
-        description: "An unmanaged global array accumulates ~500MB of string buffers, starving garbage collection and exhausting heap memory allocation.",
+        description: `Unmanaged memory accumulated in global array. Current heap usage: ${heapUsedMB}MB across ${memoryLeakArray.length} leaked objects.`,
         heapUsedMB,
         logSnippet,
-        stack: `OutOfMemoryError: Java heap space\n    at allocateHeapSpace (/app/server.js:120:25)\n    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)`
+        stack: `java.lang.OutOfMemoryError: Java heap space\n    at java.base/java.util.Arrays.copyOf(Arrays.java:3522)\n    at com.autoheal.service.LeakService.allocateHeapSpace(LeakService.java:88)\n    at com.autoheal.controller.SimulationServlet.doGet(SimulationServlet.java:45)`
     });
 });
+app.get('/api/error/memory/reset', (req, res) => {
+    memoryLeakArray = [];
+    res.json({ status: "success", message: "Memory leak allocations cleared." });
+});
 
-// 3. Freeze (Infinite Loop / Deadlock)
+// 3. Freeze (Event Loop Deadlock)
 app.get('/api/error/freeze', (req, res) => {
-    const logSnippet = "[CRITICAL] ServerThreadFrozen: Infinite execution loop encountered, event loop is unresponsive.";
+    const logSnippet = "[CRITICAL] ServerFreezeException: Infinite execution loop deadlock encountered, event loop is unresponsive.";
     console.error(logSnippet);
-    res.json({
-        status: "freezing",
+
+    // Simulate event loop freeze for 5 seconds (completely unblocks after 5s so app is not permanently dead)
+    const start = Date.now();
+    while (Date.now() - start < 5000) {
+        // Synchronous deadlock freeze
+    }
+
+    res.status(503).json({
+        status: "error",
         errorType: "ServerFreezeException",
         errorCode: "ERR_EVENT_LOOP_DEADLOCK",
-        statusCode: 500,
-        message: "Server is freezing. The event loop is locking up in 100ms...",
-        description: "The execution thread enters an infinite while(true) loop deadlock, completely locking up the runtime and halting all I/O polling.",
-        logSnippet
+        statusCode: 503,
+        message: "ServerFreezeException: Event loop deadlock encountered. Main thread was completely unresponsive for 5000ms.",
+        description: "The execution thread entered a blocking execution loop deadlock, completely locking up the runtime and halting all I/O polling.",
+        logSnippet,
+        stack: `ServerFreezeException: Event loop thread deadlock detected\n    at infiniteExecutionDeadlock (/app/server.js:160:12)\n    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)`
     });
-
-    setTimeout(() => {
-        while (true) {
-            // Infinite deadlock
-        }
-    }, 100);
 });
 
 // 4. Connection Pool Exhausted (Database)
