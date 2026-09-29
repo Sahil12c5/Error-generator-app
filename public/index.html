@@ -184,71 +184,408 @@
             background: var(--primary-hover);
         }
 
-        /* Demo Control Panel */
-        .demo-panel {
+        /* Live Incident Alert Banner */
+        .incident-banner {
+            display: none;
+            position: fixed;
+            top: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #7F1D1D 0%, #991B1B 100%);
+            border: 1px solid #EF4444;
+            color: #FEE2E2;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(239, 68, 68, 0.35);
+            max-width: 90%;
+            width: 680px;
+            animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translate(-50%, -20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .incident-banner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.35rem;
+        }
+        .incident-banner-body {
+            font-size: 0.85rem;
+            color: #FECACA;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .incident-banner-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        /* Floating Diagnostics FAB button */
+        .diag-fab {
             position: fixed;
             bottom: 2rem;
             right: 2rem;
-            background: rgba(17, 24, 39, 0.95);
-            backdrop-filter: blur(10px);
+            z-index: 999;
+            background: #0F172A;
             color: white;
-            padding: 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            width: 320px;
-            z-index: 1000;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 0.85rem 1.4rem;
+            border-radius: 999px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
+        }
+        .diag-fab:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(79, 70, 229, 0.35);
+            border-color: #6366F1;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 10px #10B981;
+            animation: pulse 2s infinite;
+        }
+        .status-dot.error {
+            background: #EF4444;
+            box-shadow: 0 0 10px #EF4444;
+        }
+        .status-dot.warning {
+            background: #F59E0B;
+            box-shadow: 0 0 10px #F59E0B;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.25); opacity: 0.75; }
         }
 
-        .demo-panel h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
+        /* Diagnostics Modal / Dashboard Overlay */
+        .diag-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+        .diag-overlay.active {
+            display: flex;
+        }
+        .diag-modal {
+            background: #0F172A;
+            color: #F8FAFC;
+            width: 100%;
+            max-width: 1100px;
+            height: 88vh;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .diag-header {
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: rgba(30, 41, 59, 0.5);
         }
-        
-        .demo-badge {
-            background: var(--primary);
+        .diag-header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .diag-header-title h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+        .diag-tag {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818CF8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
             font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 99px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #94A3B8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .close-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Filter Tabs */
+        .diag-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1.75rem;
+            background: #1E293B;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            overflow-x: auto;
+        }
+        .tab-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #94A3B8;
+            font-weight: 600;
+            font-size: 0.82rem;
+            padding: 0.4rem 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .tab-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .tab-btn.active {
+            background: #4F46E5;
+            color: white;
+            border-color: #6366F1;
+        }
+
+        /* Modal Body (2 Columns: Error Grid + Live Console) */
+        .diag-body {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            flex: 1;
+            overflow: hidden;
+        }
+        @media (max-width: 900px) {
+            .diag-body {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+            }
+        }
+
+        /* Error Cards Grid */
+        .error-grid-pane {
+            padding: 1.25rem 1.75rem;
+            overflow-y: auto;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .error-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 0.85rem;
+        }
+        .error-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 0.9rem 1rem;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .error-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .error-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.4rem;
+        }
+        .error-card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #F8FAFC;
+        }
+        .error-badge-cat {
+            font-size: 0.65rem;
             padding: 2px 6px;
             border-radius: 4px;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
+        .cat-db { background: #064E3B; color: #6EE7B7; }
+        .cat-sys { background: #4C1D95; color: #C4B5FD; }
+        .cat-os { background: #78350F; color: #FCD34D; }
+        .cat-net { background: #831843; color: #F9A8D4; }
 
-        .demo-btn {
-            display: block;
-            width: 100%;
-            padding: 0.8rem;
-            margin-bottom: 0.5rem;
-            border: none;
+        .error-card-sub {
+            font-family: monospace;
+            font-size: 0.72rem;
+            color: #94A3B8;
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+        }
+        .error-trigger-btn {
+            background: #1E293B;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 0.5rem 0.8rem;
             border-radius: 8px;
+            font-size: 0.78rem;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
-            text-align: left;
-            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .error-trigger-btn:hover {
+            background: #EF4444;
+            border-color: #F87171;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+        }
+        .error-trigger-btn.btn-warning:hover {
+            background: #F59E0B;
+            border-color: #FBBF24;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
         }
 
-        .demo-btn:hover {
-            opacity: 0.9;
+        /* Live Terminal / Observability Console */
+        .terminal-pane {
+            display: flex;
+            flex-direction: column;
+            background: #090D16;
+            overflow: hidden;
+        }
+        .terminal-header {
+            padding: 0.75rem 1.25rem;
+            background: #111827;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .terminal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .terminal-title {
+            font-size: 0.75rem;
+            font-family: monospace;
+            color: #94A3B8;
+        }
+        .terminal-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .terminal-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #CBD5E1;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .terminal-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
         }
 
-        .btn-lag { background: #3B82F6; color: white; }
-        .btn-mem { background: #8B5CF6; color: white; }
-        .btn-freeze { background: #EF4444; color: white; }
-        .btn-other { background: #374151; color: white; }
-
-        #status-bar {
-            margin-top: 10px;
+        .terminal-output {
+            flex: 1;
+            padding: 1.25rem;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 0.8rem;
-            color: #9CA3AF;
-            text-align: center;
-            min-height: 1.2rem;
+            line-height: 1.6;
+            color: #E2E8F0;
         }
-        
+        .log-entry {
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        .log-time { color: #64748B; }
+        .log-error { color: #EF4444; font-weight: 700; }
+        .log-warn { color: #F59E0B; font-weight: 700; }
+        .log-info { color: #38BDF8; }
+        .log-success { color: #10B981; font-weight: 700; }
+        .log-stack {
+            color: #94A3B8;
+            white-space: pre-wrap;
+            font-size: 0.75rem;
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem;
+            border-radius: 6px;
+            margin-top: 0.4rem;
+        }
+        .log-remediation {
+            margin-top: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid #10B981;
+            padding: 0.4rem 0.6rem;
+            color: #A7F3D0;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .heal-btn-action {
+            background: #10B981;
+            color: #064E3B;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.2s;
+        }
+        .heal-btn-action:hover {
+            background: #34D399;
+            color: #022C22;
+        }
+
         /* Spinner */
         .spinner {
             display: inline-block;
@@ -258,11 +595,9 @@
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
-            margin-right: 8px;
             vertical-align: middle;
             display: none;
         }
-        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -271,6 +606,18 @@
 </head>
 <body>
 
+    <!-- Incident Toast Banner -->
+    <div id="incidentBanner" class="incident-banner">
+        <div class="incident-banner-header">
+            <span id="bannerTitle">⚠️ SYSTEM INCIDENT DETECTED</span>
+            <button class="incident-banner-close" onclick="closeBanner()">✕ Dismiss</button>
+        </div>
+        <div class="incident-banner-body" id="bannerMessage">
+            Error details will display here...
+        </div>
+    </div>
+
+    <!-- Navigation -->
     <nav>
         <div class="logo">Nexus.</div>
         <div class="nav-links">
@@ -281,43 +628,354 @@
         <button class="cart-btn">Cart (0)</button>
     </nav>
 
+    <!-- Hero Section -->
     <div class="hero">
         <h1>The Future of Tech.</h1>
         <p>Discover our curated collection of premium electronics, designed to elevate your everyday workflow.</p>
     </div>
 
+    <!-- Products Grid -->
     <div class="products-section">
         <h2 class="section-title">Trending Now</h2>
         <div class="product-grid" id="productGrid">
-            <!-- Products will be injected here via JS -->
             <p style="grid-column: 1/-1; text-align: center; color: #6B7280;">Loading products...</p>
         </div>
     </div>
 
-    <!-- Floating Demo Panel -->
-    <div class="demo-panel">
-        <h3>System Diagnostics <span class="demo-badge">Demo</span></h3>
-        <p style="font-size: 0.8rem; color: #9CA3AF; margin-bottom: 1rem;">Trigger specific server behaviors to test the Auto-Healing Engine.</p>
-        
-        <button class="demo-btn btn-lag" onclick="triggerAction('/api/error/lag', this)">
-            <span class="spinner"></span> Simulate High Traffic (CPU Lag)
-        </button>
-        <button class="demo-btn btn-mem" onclick="triggerAction('/api/error/memory', this)">
-            <span class="spinner"></span> Simulate Memory Leak (Heap Spike)
-        </button>
-        <button class="demo-btn btn-freeze" onclick="triggerAction('/api/error/freeze', this)">
-            <span class="spinner"></span> Trigger System Crash (Freeze)
-        </button>
-        
-        <div style="margin: 1rem 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
-        
-        <button class="demo-btn btn-other" onclick="triggerAction('/api/sync-error', this)">500 Sync DB Error</button>
-        <button class="demo-btn btn-other" onclick="triggerAction('/api/async-error', this)">500 Async Gateway Error</button>
-        
-        <div id="status-bar">System Online</div>
+    <!-- Diagnostics Floating Launcher -->
+    <button class="diag-fab" onclick="openModal()">
+        <span class="status-dot" id="systemStatusDot"></span>
+        <span>Simulate Errors & AutoHeal</span>
+        <span style="background: rgba(255,255,255,0.2); padding: 2px 7px; border-radius: 99px; font-size: 0.75rem;">11</span>
+    </button>
+
+    <!-- Diagnostics Modal / Demo Suite -->
+    <div id="diagModalOverlay" class="diag-overlay">
+        <div class="diag-modal">
+            <!-- Modal Header -->
+            <div class="diag-header">
+                <div class="diag-header-title">
+                    <h2>Auto-Healing Error Simulation Suite</h2>
+                    <span class="diag-tag">Observability Demo</span>
+                </div>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+
+            <!-- Category Filter Tabs -->
+            <div class="diag-tabs">
+                <button class="tab-btn active" onclick="filterCategory('all', this)">All Scenarios (11)</button>
+                <button class="tab-btn" onclick="filterCategory('db', this)">Database & Cache (2)</button>
+                <button class="tab-btn" onclick="filterCategory('sys', this)">Compute & Memory (3)</button>
+                <button class="tab-btn" onclick="filterCategory('os', this)">OS & Storage (3)</button>
+                <button class="tab-btn" onclick="filterCategory('net', this)">Network & Security (3)</button>
+            </div>
+
+            <!-- Body: Cards + Live Log Inspector -->
+            <div class="diag-body">
+                <!-- Left: 11 Error Triggers -->
+                <div class="error-grid-pane">
+                    <div class="error-cards-container" id="errorCardsContainer">
+
+                        <!-- 1. Connection Pool Exhausted -->
+                        <div class="error-card" data-cat="db">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">🔌 Connection Pool Exhausted</div>
+                                    <span class="error-badge-cat cat-db">DB</span>
+                                </div>
+                                <div class="error-card-sub">java.sql.SQLException: Connection pool exhausted</div>
+                            </div>
+                            <button class="error-trigger-btn" onclick="triggerError('/api/sync-error', 'Connection Pool Exhausted', this)">
+                                <span class="spinner"></span> Trigger DB Pool Error
+                            </button>
+                        </div>
+
+                        <!-- 2. RedisCacheException -->
+                        <div class="error-card" data-cat="db">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">⚡ RedisCacheException</div>
+                                    <span class="error-badge-cat cat-db">Cache</span>
+                                </div>
+                                <div class="error-card-sub">RedisCacheException: Connection refused :6379</div>
+                            </div>
+                            <button class="error-trigger-btn" onclick="triggerError('/api/async-error', 'RedisCacheException', this)">
+                                <span class="spinner"></span> Trigger Redis Outage
+                            </button>
+                        </div>
+
+                        <!-- 3. Memory Leak -->
+                        <div class="error-card" data-cat="sys">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">🧠 Memory Leak (Heap Spike)</div>
+                                    <span class="error-badge-cat cat-sys">Memory</span>
+                                </div>
+                                <div class="error-card-sub">OutOfMemoryError: Java heap space</div>
+                            </div>
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/memory', 'Memory Leak (OutOfMemoryError)', this)">
+                                <span class="spinner"></span> Spike Heap Memory
+                            </button>
+                        </div>
+
+                        <!-- 4. CPU Lag Spike -->
+                        <div class="error-card" data-cat="sys">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">🔥 CPU Lag (Starvation)</div>
+                                    <span class="error-badge-cat cat-sys">Compute</span>
+                                </div>
+                                <div class="error-card-sub">EventLoopBlocked: High CPU spin for 5s</div>
+                            </div>
+                            <button class="error-trigger-btn btn-warning" onclick="triggerError('/api/error/lag', 'CPU Lag Spike', this)">
+                                <span class="spinner"></span> Simulate High CPU Load
+                            </button>
+                        </div>
+
+                        <!-- 5. Freeze -->
+                        <div class="error-card" data-cat="sys">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">🧊 Event Loop Freeze</div>
+                                    <span class="error-badge-cat cat-sys">Deadlock</span>
+                                </div>
+                                <div class="error-card-sub">ServerThreadFrozen: Infinite deadlock</div>
+                            </div>
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/freeze', 'Server Freeze (Deadlock)', this)">
+                                <span class="spinner"></span> Freeze Server Thread
+                            </button>
+                        </div>
+
+                        <!-- 6. No space left on device (ENOSPC) -->
+                        <div class="error-card" data-cat="os">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">💾 Disk Full (ENOSPC)</div>
+                                    <span class="error-badge-cat cat-os">Storage</span>
+                                </div>
+                                <div class="error-card-sub">ENOSPC: no space left on device, write</div>
+                            </div>
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/enospc', 'No space left on device (ENOSPC)', this)">
+                                <span class="spinner"></span> Fill Disk Space
+                            </button>
+                        </div>
+
+                        <!-- 7. File Already Exists (EEXIST) -->
+                        <div class="error-card" data-cat="os">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">📁 File Exists Conflict (EEXIST)</div>
+                                    <span class="error-badge-cat cat-os">Filesystem</span>
+                                </div>
+                                <div class="error-card-sub">EEXIST: file already exists, lockfile conflict</div>
+                            </div>
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/eexist', 'File Exists (EEXIST)', this)">
+                                <span class="spinner"></span> Cause Lockfile Conflict
+                            </button>
+                        </div>
+
+                        <!-- 8. Too Many Open Files (EMFILE) -->
+                        <div class="error-card" data-cat="os">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">📂 Too Many Open Files (EMFILE)</div>
+                                    <span class="error-badge-cat cat-os">OS Limit</span>
+                                </div>
+                                <div class="error-card-sub">EMFILE: too many open files (ulimit -n)</div>
+                            </div>
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/emfile', 'Too Many Open Files (EMFILE)', this)">
+                                <span class="spinner"></span> Exhaust Descriptors
+                            </button>
+                        </div>
+
+                        <!-- 9. 502 Bad Gateway -->
+                        <div class="error-card" data-cat="net">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">🌐 502 Bad Gateway</div>
+                                    <span class="error-badge-cat cat-net">Network</span>
+                                </div>
+                                <div class="error-card-sub">HTTP 502: Upstream proxy connection failure</div>
+                            </div>
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/bad-gateway', '502 Bad Gateway', this)">
+                                <span class="spinner"></span> Drop Upstream Proxy
+                            </button>
+                        </div>
+
+                        <!-- 10. Defunct Process -->
+                        <div class="error-card" data-cat="net">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">🧟 Defunct (Zombie Process)</div>
+                                    <span class="error-badge-cat cat-net">Process</span>
+                                </div>
+                                <div class="error-card-sub">ProcessZombieException: PID 4092 &lt;defunct&gt;</div>
+                            </div>
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/defunct', 'Defunct Zombie Process', this)">
+                                <span class="spinner"></span> Spawn Zombie Process
+                            </button>
+                        </div>
+
+                        <!-- 11. Certificate Expired -->
+                        <div class="error-card" data-cat="net">
+                            <div>
+                                <div class="error-card-top">
+                                    <div class="error-card-title">🔒 Certificate Expired</div>
+                                    <span class="error-badge-cat cat-net">Security</span>
+                                </div>
+                                <div class="error-card-sub">TLSError: CERT_HAS_EXPIRED on SSL handshake</div>
+                            </div>
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/cert-expired', 'Certificate Expired', this)">
+                                <span class="spinner"></span> Invalidate TLS Cert
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Right: Observability Terminal & Log Stream -->
+                <div class="terminal-pane">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <span class="terminal-dot" style="background: #EF4444;"></span>
+                            <span class="terminal-dot" style="background: #F59E0B;"></span>
+                            <span class="terminal-dot" style="background: #10B981;"></span>
+                        </div>
+                        <span class="terminal-title">AGENT LOG STREAM: /app/app.log</span>
+                        <div class="terminal-actions">
+                            <button class="terminal-btn" onclick="copyConsole()">Copy Log</button>
+                            <button class="terminal-btn" onclick="clearConsole()">Clear</button>
+                        </div>
+                    </div>
+                    <div class="terminal-output" id="terminalOutput">
+                        <div class="log-entry">
+                            <span class="log-time">[${new Date().toLocaleTimeString()}]</span> <span class="log-info">[AGENT_ONLINE]</span>
+                            <div>AutoHeal Observability Agent connected. Monitoring active stream for errors.</div>
+                            <div style="color: #64748B; font-size: 0.72rem; margin-top: 4px;">Click any scenario on the left to simulate failure.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // Modal Controls
+        function openModal() {
+            document.getElementById('diagModalOverlay').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('diagModalOverlay').classList.remove('active');
+        }
+        function closeBanner() {
+            document.getElementById('incidentBanner').style.display = 'none';
+        }
+
+        // Category Filter
+        function filterCategory(cat, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const cards = document.querySelectorAll('.error-card');
+            cards.forEach(card => {
+                if (cat === 'all' || card.dataset.cat === cat) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Copy Terminal Content
+        function copyConsole() {
+            const terminal = document.getElementById('terminalOutput');
+            navigator.clipboard.writeText(terminal.innerText).then(() => {
+                alert("Observability log copied to clipboard!");
+            });
+        }
+
+        // Clear Terminal Content
+        function clearConsole() {
+            document.getElementById('terminalOutput').innerHTML = `
+                <div class="log-entry">
+                    <span class="log-time">[${new Date().toLocaleTimeString()}]</span> <span class="log-info">[CONSOLE_CLEARED]</span>
+                    <div>Terminal cleared. System ready for next scenario.</div>
+                </div>
+            `;
+            setSystemStatus('normal');
+        }
+
+        // Set Status Indicator
+        function setSystemStatus(status) {
+            const dot = document.getElementById('systemStatusDot');
+            dot.className = 'status-dot';
+            if (status === 'error') dot.classList.add('error');
+            if (status === 'warning') dot.classList.add('warning');
+        }
+
+        // Trigger Simulated Error
+        async function triggerError(endpoint, errorTitle, btn) {
+            const spinner = btn.querySelector('.spinner');
+            if (spinner) spinner.style.display = 'inline-block';
+            btn.disabled = true;
+
+            const banner = document.getElementById('incidentBanner');
+            const bannerTitle = document.getElementById('bannerTitle');
+            const bannerMessage = document.getElementById('bannerMessage');
+            const terminal = document.getElementById('terminalOutput');
+
+            setSystemStatus('warning');
+
+            const startTime = Date.now();
+
+            try {
+                const res = await fetch(endpoint);
+                const data = await res.json().catch(() => ({ status: 'error', message: 'Failed to parse JSON payload' }));
+                const duration = Date.now() - startTime;
+
+                const isWarning = res.status === 200 && data.status === 'success';
+                const statusTypeClass = isWarning ? 'log-warn' : 'log-error';
+                const statusBadge = isWarning ? `[WARN ${data.statusCode || 200}]` : `[FAIL ${res.status || data.statusCode || 500}]`;
+
+                setSystemStatus(isWarning ? 'warning' : 'error');
+
+                // Update Incident Banner
+                banner.style.display = 'block';
+                bannerTitle.innerText = `🚨 INCIDENT: ${errorTitle.toUpperCase()} (${res.status || data.statusCode})`;
+                bannerMessage.innerText = data.logSnippet || data.message || 'Error occurred';
+
+                // Append to Terminal Log Output
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `
+                    <span class="log-time">[${new Date().toLocaleTimeString()}]</span> 
+                    <span class="${statusTypeClass}">${statusBadge} ${data.errorCode || 'ERR'}</span>
+                    <div style="font-weight: 600; margin-top: 2px;">${data.message || 'Failure occurred'}</div>
+                    ${data.logSnippet ? `<div style="color: #F87171; font-size: 0.75rem; margin-top: 2px;">&gt;&gt; LOG STREAM (app.log): ${data.logSnippet}</div>` : ''}
+                    ${data.stack ? `<div class="log-stack">${data.stack}</div>` : ''}
+                `;
+                terminal.prepend(entry);
+
+            } catch (err) {
+                setSystemStatus('error');
+                banner.style.display = 'block';
+                bannerTitle.innerText = `🚨 SYSTEM CRITICAL: ${errorTitle.toUpperCase()}`;
+                bannerMessage.innerText = 'Connection refused / Event loop locked up: ' + err.message;
+
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `
+                    <span class="log-time">[${new Date().toLocaleTimeString()}]</span> 
+                    <span class="log-error">[CRITICAL] SERVER_DEADLOCK</span>
+                    <div style="font-weight: 600; margin-top: 2px;">Connection refused or process unresponsive (Deadlock / Crash).</div>
+                `;
+                terminal.prepend(entry);
+            } finally {
+                if (spinner) spinner.style.display = 'none';
+                btn.disabled = false;
+            }
+        }
+
         // Fetch and display products
         async function loadProducts() {
             try {
@@ -349,7 +1007,7 @@
             }
         }
 
-        // Dummy add to cart
+        // Add to Cart Simulation
         function addToCart(id, btn) {
             const originalText = btn.innerText;
             btn.innerText = 'Added!';
@@ -365,47 +1023,6 @@
                 btn.innerText = originalText;
                 btn.style.background = '';
             }, 2000);
-        }
-
-        // Trigger Demo Actions
-        async function triggerAction(endpoint, btn) {
-            const statusBar = document.getElementById('status-bar');
-            const spinner = btn.querySelector('.spinner');
-            
-            if (spinner) spinner.style.display = 'inline-block';
-            statusBar.innerText = 'Sending request...';
-            statusBar.style.color = '#F59E0B';
-            btn.style.opacity = '0.7';
-            btn.disabled = true;
-
-            const startTime = Date.now();
-
-            try {
-                const response = await fetch(endpoint);
-                const data = await response.json().catch(() => ({ status: 'error', message: 'Failed to parse JSON' }));
-                
-                const timeTaken = Date.now() - startTime;
-                
-                console.log("Action Response:", data);
-                statusBar.innerText = `Action completed in ${timeTaken}ms`;
-                statusBar.style.color = '#10B981';
-
-            } catch (err) {
-                console.error("Network request failed:", err);
-                statusBar.innerText = 'Connection refused or server frozen.';
-                statusBar.style.color = '#EF4444';
-            } finally {
-                if (spinner) spinner.style.display = 'none';
-                btn.style.opacity = '1';
-                btn.disabled = false;
-                
-                setTimeout(() => {
-                    if (statusBar.innerText.includes('completed')) {
-                        statusBar.innerText = 'System Online';
-                        statusBar.style.color = '#9CA3AF';
-                    }
-                }, 5000);
-            }
         }
 
         // Initialize

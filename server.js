@@ -101,62 +101,195 @@ app.post('/api/cart/add', (req, res) => {
     res.json({ status: 'success', message: 'Product added to cart' });
 });
 
-// --- NEW PREDICTABLE ERROR ENDPOINTS ---
+// --- PREDICTABLE ERROR SIMULATION ENDPOINTS ---
 
+// 1. CPU Lag Spike
 app.get('/api/error/lag', (req, res) => {
-    console.warn("⚠️ Lag requested: Simulating heavy CPU load for 5 seconds...");
+    console.warn("⚠️ [COMPUTE_SPIKE] Heavy CPU load requested: Simulating 5-second blocking computation...");
     const start = Date.now();
-    // Synchronous loop blocking the event loop
     while (Date.now() - start < 5000) {
-        // Do nothing, just spin
+        // Synchronous loop blocking Node event loop
     }
-    res.json({ status: "success", message: "CPU load simulation finished after 5 seconds." });
-});
-
-app.get('/api/error/memory', (req, res) => {
-    console.warn("⚠️ Memory spike requested: Allocating huge objects...");
-    for (let i = 0; i < 500000; i++) {
-        memoryLeakArray.push({ index: i, data: "A".repeat(1000) }); // Allocate ~500MB string data
-    }
-    const memoryUsage = process.memoryUsage();
-    
-    // Log the exact error pattern expected by AutoHeal
-    console.error("Fatal Memory Leak: OutOfMemoryError: Java heap space in Garbage Collector");
-    
-    res.json({ 
-        status: "success", 
-        message: "Memory leak spiked and logged OutOfMemoryError.", 
-        heapUsedMB: Math.round(memoryUsage.heapUsed / 1024 / 1024)
+    const duration = Date.now() - start;
+    const logSnippet = `[WARN] EventLoopBlocked: Main thread was starved for ${duration}ms due to high CPU load.`;
+    console.warn(logSnippet);
+    res.json({
+        status: "success",
+        errorType: "HighLatencyWarning",
+        errorCode: "ERR_CPU_STARVATION",
+        statusCode: 200,
+        message: `CPU load simulation completed. Event loop blocked for ${duration}ms.`,
+        durationMs: duration,
+        logSnippet
     });
 });
 
+// 2. Memory Leak (Heap Spike)
+app.get('/api/error/memory', (req, res) => {
+    console.warn("⚠️ [MEMORY_LEAK] Spiking memory allocation...");
+    for (let i = 0; i < 500000; i++) {
+        memoryLeakArray.push({ index: i, data: "A".repeat(1000) });
+    }
+    const mem = process.memoryUsage();
+    const heapUsedMB = Math.round(mem.heapUsed / 1024 / 1024);
+    const logSnippet = `Fatal Memory Leak: OutOfMemoryError: Java heap space in Garbage Collector (Heap used: ${heapUsedMB}MB)`;
+    console.error(logSnippet);
+
+    res.status(500).json({
+        status: "error",
+        errorType: "OutOfMemoryError",
+        errorCode: "ERR_HEAP_EXHAUSTED",
+        statusCode: 500,
+        message: "Fatal Memory Leak: OutOfMemoryError: Java heap space in Garbage Collector",
+        heapUsedMB,
+        logSnippet,
+        stack: `OutOfMemoryError: Java heap space\n    at allocateHeapSpace (/app/server.js:120:25)\n    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)`
+    });
+});
+
+// 3. Freeze (Infinite Loop / Deadlock)
 app.get('/api/error/freeze', (req, res) => {
-    console.warn("⚠️ Server freeze requested: Entering infinite loop...");
-    // We send the response FIRST so the frontend knows it was clicked, 
-    // but the server will freeze immediately after.
-    res.json({ status: "freezing", message: "Server is entering infinite loop now..." });
-    
+    const logSnippet = "[CRITICAL] ServerThreadFrozen: Infinite execution loop encountered, event loop is unresponsive.";
+    console.error(logSnippet);
+    res.json({
+        status: "freezing",
+        errorType: "ServerFreezeException",
+        errorCode: "ERR_EVENT_LOOP_DEADLOCK",
+        statusCode: 500,
+        message: "Server is freezing. The event loop is locking up in 100ms...",
+        logSnippet
+    });
+
     setTimeout(() => {
         while (true) {
-            // Infinite loop, completely freezes the Node.js event loop
+            // Infinite deadlock
         }
     }, 100);
 });
 
-// --- ORIGINAL BASIC ERROR ENDPOINTS ---
-
+// 4. Connection Pool Exhausted (Database)
 app.get('/api/sync-error', (req, res) => {
-    throw new Error("java.sql.SQLException: Connection pool exhausted");
+    const logSnippet = "java.sql.SQLException: Connection pool exhausted (active: 50, idle: 0, max: 50)";
+    console.error(`[DATABASE_ERROR] ${logSnippet}`);
+    res.status(500).json({
+        status: "error",
+        errorType: "SQLException",
+        errorCode: "ERR_DB_POOL_EXHAUSTED",
+        statusCode: 500,
+        message: logSnippet,
+        logSnippet,
+        stack: `java.sql.SQLException: Connection pool exhausted\n    at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:213)\n    at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:82)`
+    });
+});
+app.get('/api/error/db-pool', (req, res) => res.redirect('/api/sync-error'));
+
+// 5. RedisCacheException (Cache Outage)
+app.get('/api/async-error', (req, res) => {
+    const logSnippet = "RedisCacheException: Connection refused to Redis server at 127.0.0.1:6379";
+    console.error(`[CACHE_ERROR] ${logSnippet}`);
+    res.status(500).json({
+        status: "error",
+        errorType: "RedisCacheException",
+        errorCode: "ERR_REDIS_CONNECTION_REFUSED",
+        statusCode: 500,
+        message: logSnippet,
+        logSnippet,
+        stack: `RedisCacheException: Connection refused to Redis server\n    at RedisClient.onConnectionFailed (/app/node_modules/ioredis/lib/redis.js:412:13)\n    at Socket.emit (node:events:517:28)`
+    });
+});
+app.get('/api/error/redis', (req, res) => res.redirect('/api/async-error'));
+
+// 6. No space left on device (ENOSPC)
+app.get('/api/error/enospc', (req, res) => {
+    const logSnippet = "Error: ENOSPC: no space left on device, write '/var/log/application/audit.log'";
+    console.error(`[STORAGE_CRITICAL] ${logSnippet}`);
+    res.status(507).json({
+        status: "error",
+        errorType: "DiskSpaceExhaustionError",
+        errorCode: "ENOSPC",
+        statusCode: 507,
+        message: "ENOSPC: no space left on device, write error on partition /dev/sda1 (100% full)",
+        logSnippet,
+        stack: `Error: ENOSPC: no space left on device, write\n    at SyncWriteStream.write (node:fs:2813:16)\n    at Console.log (node:internal/console/constructor:360:16)\n    at /app/server.js:192:12`
+    });
 });
 
-app.get('/api/async-error', async (req, res, next) => {
-    try {
-        await Promise.reject(new Error("RedisCacheException: Connection refused to Redis server"));
-    } catch (error) {
-        next(error);
-    }
+// 7. 502 Bad Gateway
+app.get('/api/error/bad-gateway', (req, res) => {
+    const logSnippet = "HTTP/1.1 502 Bad Gateway: Upstream reverse proxy failed to receive valid response from microservice upstream:5000";
+    console.error(`[GATEWAY_ERROR] ${logSnippet}`);
+    res.status(502).json({
+        status: "error",
+        errorType: "BadGatewayError",
+        errorCode: "ERR_BAD_GATEWAY",
+        statusCode: 502,
+        message: "502 Bad Gateway: The proxy server received an invalid or null response from the upstream cluster.",
+        logSnippet,
+        stack: `BadGatewayError: 502 Bad Gateway\n    at ProxyPassHandler.forward (/etc/nginx/router.lua:104)\n    at UpstreamSocket.onClose (node:net:310:14)`
+    });
 });
 
+// 8. EEXIST (File or lock already exists)
+app.get('/api/error/eexist', (req, res) => {
+    const logSnippet = "Error: EEXIST: file already exists, open '/var/run/worker-daemon.pid'";
+    console.error(`[FILESYSTEM_CONFLICT] ${logSnippet}`);
+    res.status(409).json({
+        status: "error",
+        errorType: "FileExistsConflict",
+        errorCode: "EEXIST",
+        statusCode: 409,
+        message: "EEXIST: file already exists, lockfile '/var/run/worker-daemon.pid' cannot be acquired.",
+        logSnippet,
+        stack: `Error: EEXIST: file already exists, open '/var/run/worker-daemon.pid'\n    at Object.openSync (node:fs:600:3)\n    at Object.writeFileSync (node:fs:2221:35)\n    at acquireLock (/app/server.js:210:8)`
+    });
+});
+
+// 9. Too many open files (EMFILE)
+app.get('/api/error/emfile', (req, res) => {
+    const logSnippet = "Error: EMFILE: too many open files, open '/app/storage/sessions/sess_91823.dat'";
+    console.error(`[OS_RESOURCE_LIMIT] ${logSnippet}`);
+    res.status(500).json({
+        status: "error",
+        errorType: "TooManyOpenFilesError",
+        errorCode: "EMFILE",
+        statusCode: 500,
+        message: "EMFILE: too many open files. Process exceeded OS file descriptor ceiling (ulimit -n 1024).",
+        logSnippet,
+        stack: `Error: EMFILE: too many open files, open '/app/storage/sessions/sess_91823.dat'\n    at Object.openSync (node:fs:585:18)\n    at SessionStore.read (/app/node_modules/session-file-store/index.js:142:10)`
+    });
+});
+
+// 10. Defunct (Zombie Process)
+app.get('/api/error/defunct', (req, res) => {
+    const logSnippet = "ProcessZombieException: Defunct process detected: PID 4092 <defunct> [node <defunct>] parent did not call waitpid()";
+    console.error(`[PROCESS_CRITICAL] ${logSnippet}`);
+    res.status(500).json({
+        status: "error",
+        errorType: "ProcessZombieException",
+        errorCode: "ERR_PROCESS_DEFUNCT",
+        statusCode: 500,
+        message: "Defunct process detected: Child process exited unexpectedly and remains in PID process table as zombie.",
+        logSnippet,
+        stack: `ProcessZombieException: Defunct process detected: PID 4092 <defunct>\n    at ChildProcessSupervisor.inspect (supervisor.js:84:11)\n    at process.on (supervisor.js:120:9)`
+    });
+});
+
+// 11. Certificate Expired (SSL / TLS)
+app.get('/api/error/cert-expired', (req, res) => {
+    const logSnippet = "TLSError: CERT_HAS_EXPIRED: certificate has expired for domain nexus-store.internal (Validity: 2023-01-01 to 2026-09-01)";
+    console.error(`[SECURITY_ALERT] ${logSnippet}`);
+    res.status(526).json({
+        status: "error",
+        errorType: "CertificateExpiredError",
+        errorCode: "CERT_HAS_EXPIRED",
+        statusCode: 526,
+        message: "CERT_HAS_EXPIRED: SSL/TLS x509 handshake verification rejected expired leaf certificate.",
+        logSnippet,
+        stack: `TLSError: CERT_HAS_EXPIRED: certificate has expired\n    at TLSSocket.onConnectSecure (node:_tls_wrap:1540:34)\n    at TLSSocket.emit (node:events:517:28)\n    at TLSSocket._finishInit (node:_tls_wrap:951:8)`
+    });
+});
+
+// Legacy routes
 app.get('/api/file-error', (req, res, next) => {
     fs.readFile('/path/to/non/existent/config.json', (err, data) => {
         if (err) return next(err);
@@ -173,11 +306,21 @@ app.get('/api/parse-error', (req, res, next) => {
     }
 });
 
+// Central Error Handler Middleware
 app.use((err, req, res, next) => {
     console.error("\n🔥 SERVER ERROR CAPTURED 🔥");
     console.error(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-    console.error(err.stack);
-    res.status(500).json({ status: "error", message: err.message, stack: err.stack });
+    console.error(err.stack || err.message);
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).json({
+        status: "error",
+        errorType: err.name || "ServerError",
+        errorCode: err.code || `ERR_${statusCode}`,
+        statusCode,
+        message: err.message,
+        stack: err.stack,
+        timestamp: new Date().toISOString()
+    });
 });
 
 app.listen(PORT, () => {
