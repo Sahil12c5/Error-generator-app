@@ -930,7 +930,25 @@
 
             try {
                 const res = await fetch(endpoint);
-                const data = await res.json().catch(() => ({ status: 'error', message: 'Failed to parse JSON payload' }));
+                let data;
+                try {
+                    data = await res.json();
+                } catch (_) {
+                    const rawText = await res.text().catch(() => '');
+                    data = {
+                        status: 'error',
+                        errorType: res.status === 502 ? 'BadGatewayError' : 'GatewayResponseError',
+                        errorCode: res.status === 502 ? 'ERR_BAD_GATEWAY' : `ERR_HTTP_${res.status}`,
+                        statusCode: res.status,
+                        message: res.status === 502
+                            ? '502 Bad Gateway: Upstream reverse proxy failed to receive valid response from microservice upstream:5000'
+                            : `HTTP ${res.status}: ${res.statusText || 'Server Error'}`,
+                        logSnippet: res.status === 502 
+                            ? 'HTTP/1.1 502 Bad Gateway: Upstream reverse proxy failed to receive valid response from microservice upstream:5000'
+                            : `HTTP/1.1 ${res.status} ${res.statusText || 'Error'} from server`,
+                        stack: rawText ? (rawText.length > 250 ? rawText.substring(0, 250) + '...' : rawText) : `HTTP ${res.status} ${res.statusText}`
+                    };
+                }
                 const duration = Date.now() - startTime;
 
                 const isWarning = res.status === 200 && data.status === 'success';

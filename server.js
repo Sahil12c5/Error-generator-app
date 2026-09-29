@@ -218,6 +218,7 @@ app.get('/api/error/enospc', (req, res) => {
 app.get('/api/error/bad-gateway', (req, res) => {
     const logSnippet = "HTTP/1.1 502 Bad Gateway: Upstream reverse proxy failed to receive valid response from microservice upstream:5000";
     console.error(`[GATEWAY_ERROR] ${logSnippet}`);
+    res.setHeader('Content-Type', 'application/json');
     res.status(502).json({
         status: "error",
         errorType: "BadGatewayError",
