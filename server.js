@@ -119,6 +119,7 @@ app.get('/api/error/lag', (req, res) => {
         errorCode: "ERR_CPU_STARVATION",
         statusCode: 200,
         message: `CPU load simulation completed. Event loop blocked for ${duration}ms.`,
+        description: "A synchronous compute loop monopolizes the single-threaded Node.js event loop for 5s, causing latency spikes and starving concurrent requests.",
         durationMs: duration,
         logSnippet
     });
@@ -141,6 +142,7 @@ app.get('/api/error/memory', (req, res) => {
         errorCode: "ERR_HEAP_EXHAUSTED",
         statusCode: 500,
         message: "Fatal Memory Leak: OutOfMemoryError: Java heap space in Garbage Collector",
+        description: "An unmanaged global array accumulates ~500MB of string buffers, starving garbage collection and exhausting heap memory allocation.",
         heapUsedMB,
         logSnippet,
         stack: `OutOfMemoryError: Java heap space\n    at allocateHeapSpace (/app/server.js:120:25)\n    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)`
@@ -157,6 +159,7 @@ app.get('/api/error/freeze', (req, res) => {
         errorCode: "ERR_EVENT_LOOP_DEADLOCK",
         statusCode: 500,
         message: "Server is freezing. The event loop is locking up in 100ms...",
+        description: "The execution thread enters an infinite while(true) loop deadlock, completely locking up the runtime and halting all I/O polling.",
         logSnippet
     });
 
@@ -177,6 +180,7 @@ app.get('/api/sync-error', (req, res) => {
         errorCode: "ERR_DB_POOL_EXHAUSTED",
         statusCode: 500,
         message: logSnippet,
+        description: "All database pool connections are occupied by unclosed transactions. New SQL queries cannot acquire a connection and time out.",
         logSnippet,
         stack: `java.sql.SQLException: Connection pool exhausted\n    at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:213)\n    at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:82)`
     });
@@ -193,6 +197,7 @@ app.get('/api/async-error', (req, res) => {
         errorCode: "ERR_REDIS_CONNECTION_REFUSED",
         statusCode: 500,
         message: logSnippet,
+        description: "The application cannot establish a TCP connection to the Redis server on port 6379, causing session lookups and caching to fail.",
         logSnippet,
         stack: `RedisCacheException: Connection refused to Redis server\n    at RedisClient.onConnectionFailed (/app/node_modules/ioredis/lib/redis.js:412:13)\n    at Socket.emit (node:events:517:28)`
     });
@@ -209,6 +214,7 @@ app.get('/api/error/enospc', (req, res) => {
         errorCode: "ENOSPC",
         statusCode: 507,
         message: "ENOSPC: no space left on device, write error on partition /dev/sda1 (100% full)",
+        description: "The primary filesystem partition /dev/sda1 has hit 100% utilization. File append, logging, and temporary data writes fail immediately.",
         logSnippet,
         stack: `Error: ENOSPC: no space left on device, write\n    at SyncWriteStream.write (node:fs:2813:16)\n    at Console.log (node:internal/console/constructor:360:16)\n    at /app/server.js:192:12`
     });
@@ -225,6 +231,7 @@ app.get('/api/error/bad-gateway', (req, res) => {
         errorCode: "ERR_BAD_GATEWAY",
         statusCode: 502,
         message: "502 Bad Gateway: The proxy server received an invalid or null response from the upstream cluster.",
+        description: "The reverse proxy (NGINX/Cloudflare) received an invalid response, TCP reset, or gateway timeout from the upstream service cluster.",
         logSnippet,
         stack: `BadGatewayError: 502 Bad Gateway\n    at ProxyPassHandler.forward (/etc/nginx/router.lua:104)\n    at UpstreamSocket.onClose (node:net:310:14)`
     });
@@ -240,6 +247,7 @@ app.get('/api/error/eexist', (req, res) => {
         errorCode: "EEXIST",
         statusCode: 409,
         message: "EEXIST: file already exists, lockfile '/var/run/worker-daemon.pid' cannot be acquired.",
+        description: "A lingering PID lockfile on the filesystem prevents the worker daemon from initializing with an exclusive filesystem mutex.",
         logSnippet,
         stack: `Error: EEXIST: file already exists, open '/var/run/worker-daemon.pid'\n    at Object.openSync (node:fs:600:3)\n    at Object.writeFileSync (node:fs:2221:35)\n    at acquireLock (/app/server.js:210:8)`
     });
@@ -255,6 +263,7 @@ app.get('/api/error/emfile', (req, res) => {
         errorCode: "EMFILE",
         statusCode: 500,
         message: "EMFILE: too many open files. Process exceeded OS file descriptor ceiling (ulimit -n 1024).",
+        description: "The operating system per-process file descriptor table limit (ulimit -n 1024) is breached, rejecting all subsequent file or socket descriptors.",
         logSnippet,
         stack: `Error: EMFILE: too many open files, open '/app/storage/sessions/sess_91823.dat'\n    at Object.openSync (node:fs:585:18)\n    at SessionStore.read (/app/node_modules/session-file-store/index.js:142:10)`
     });
@@ -270,6 +279,7 @@ app.get('/api/error/defunct', (req, res) => {
         errorCode: "ERR_PROCESS_DEFUNCT",
         statusCode: 500,
         message: "Defunct process detected: Child process exited unexpectedly and remains in PID process table as zombie.",
+        description: "A spawned child worker process exited without the parent process invoking waitpid(), leaving dead zombie entries that pollute the OS PID table.",
         logSnippet,
         stack: `ProcessZombieException: Defunct process detected: PID 4092 <defunct>\n    at ChildProcessSupervisor.inspect (supervisor.js:84:11)\n    at process.on (supervisor.js:120:9)`
     });
@@ -285,6 +295,7 @@ app.get('/api/error/cert-expired', (req, res) => {
         errorCode: "CERT_HAS_EXPIRED",
         statusCode: 526,
         message: "CERT_HAS_EXPIRED: SSL/TLS x509 handshake verification rejected expired leaf certificate.",
+        description: "The TLS/SSL certificate presented during the cryptographic handshake is past its NotAfter validity timestamp, causing clients to abort.",
         logSnippet,
         stack: `TLSError: CERT_HAS_EXPIRED: certificate has expired\n    at TLSSocket.onConnectSecure (node:_tls_wrap:1540:34)\n    at TLSSocket.emit (node:events:517:28)\n    at TLSSocket._finishInit (node:_tls_wrap:951:8)`
     });

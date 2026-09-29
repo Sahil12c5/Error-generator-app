@@ -451,9 +451,25 @@
         .error-card-sub {
             font-family: monospace;
             font-size: 0.72rem;
-            color: #94A3B8;
-            margin-bottom: 0.75rem;
+            color: #818CF8;
+            margin-bottom: 0.35rem;
             line-height: 1.3;
+        }
+        .error-card-desc {
+            font-size: 0.75rem;
+            color: #94A3B8;
+            line-height: 1.45;
+            margin-bottom: 0.75rem;
+        }
+        .log-desc-box {
+            margin-top: 0.35rem;
+            background: rgba(99, 102, 241, 0.12);
+            border-left: 3px solid #6366F1;
+            padding: 0.4rem 0.65rem;
+            border-radius: 4px;
+            color: #C7D2FE;
+            font-size: 0.76rem;
+            line-height: 1.45;
         }
         .error-trigger-btn {
             background: #1E293B;
@@ -684,8 +700,9 @@
                                     <span class="error-badge-cat cat-db">DB</span>
                                 </div>
                                 <div class="error-card-sub">java.sql.SQLException: Connection pool exhausted</div>
+                                <p class="error-card-desc">All 50 active DB pool connections are tied up. Incoming queries fail to acquire connections and time out.</p>
                             </div>
-                            <button class="error-trigger-btn" onclick="triggerError('/api/sync-error', 'Connection Pool Exhausted', this)">
+                            <button class="error-trigger-btn" onclick="triggerError('/api/sync-error', 'Connection Pool Exhausted', this, 'All 50 active DB pool connections are tied up. Incoming queries fail to acquire connections and time out.')">
                                 <span class="spinner"></span> Trigger DB Pool Error
                             </button>
                         </div>
@@ -698,8 +715,9 @@
                                     <span class="error-badge-cat cat-db">Cache</span>
                                 </div>
                                 <div class="error-card-sub">RedisCacheException: Connection refused :6379</div>
+                                <p class="error-card-desc">TCP connection to Redis cluster on port 6379 refused. Cache lookups, session keys, and pub/sub fail.</p>
                             </div>
-                            <button class="error-trigger-btn" onclick="triggerError('/api/async-error', 'RedisCacheException', this)">
+                            <button class="error-trigger-btn" onclick="triggerError('/api/async-error', 'RedisCacheException', this, 'TCP connection to Redis cluster on port 6379 refused. Cache lookups, session keys, and pub/sub fail.')">
                                 <span class="spinner"></span> Trigger Redis Outage
                             </button>
                         </div>
@@ -712,8 +730,9 @@
                                     <span class="error-badge-cat cat-sys">Memory</span>
                                 </div>
                                 <div class="error-card-sub">OutOfMemoryError: Java heap space</div>
+                                <p class="error-card-desc">Uncollected memory buffers spike heap usage beyond safe limits (~500MB+), provoking garbage collection thrashing.</p>
                             </div>
-                            <button class="error-trigger-btn" onclick="triggerError('/api/error/memory', 'Memory Leak (OutOfMemoryError)', this)">
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/memory', 'Memory Leak (OutOfMemoryError)', this, 'Uncollected memory buffers spike heap usage beyond safe limits (~500MB+), provoking garbage collection thrashing.')">
                                 <span class="spinner"></span> Spike Heap Memory
                             </button>
                         </div>
@@ -726,8 +745,9 @@
                                     <span class="error-badge-cat cat-sys">Compute</span>
                                 </div>
                                 <div class="error-card-sub">EventLoopBlocked: High CPU spin for 5s</div>
+                                <p class="error-card-desc">Synchronous computational loop monopolizes the single-threaded event loop for 5s, starving all user requests.</p>
                             </div>
-                            <button class="error-trigger-btn btn-warning" onclick="triggerError('/api/error/lag', 'CPU Lag Spike', this)">
+                            <button class="error-trigger-btn btn-warning" onclick="triggerError('/api/error/lag', 'CPU Lag Spike', this, 'Synchronous computational loop monopolizes the single-threaded event loop for 5s, starving all user requests.')">
                                 <span class="spinner"></span> Simulate High CPU Load
                             </button>
                         </div>
@@ -740,8 +760,9 @@
                                     <span class="error-badge-cat cat-sys">Deadlock</span>
                                 </div>
                                 <div class="error-card-sub">ServerThreadFrozen: Infinite deadlock</div>
+                                <p class="error-card-desc">Enters an infinite while(true) execution loop. The event loop completely deadlocks and permanently freezes.</p>
                             </div>
-                            <button class="error-trigger-btn" onclick="triggerError('/api/error/freeze', 'Server Freeze (Deadlock)', this)">
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/freeze', 'Server Freeze (Deadlock)', this, 'Enters an infinite while(true) execution loop. The event loop completely deadlocks and permanently freezes.')">
                                 <span class="spinner"></span> Freeze Server Thread
                             </button>
                         </div>
@@ -754,8 +775,9 @@
                                     <span class="error-badge-cat cat-os">Storage</span>
                                 </div>
                                 <div class="error-card-sub">ENOSPC: no space left on device, write</div>
+                                <p class="error-card-desc">The root partition /dev/sda1 reaches 100% capacity. Application logging, temp file writes, and caches abort.</p>
                             </div>
-                            <button class="error-trigger-btn" onclick="triggerError('/api/error/enospc', 'No space left on device (ENOSPC)', this)">
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/enospc', 'No space left on device (ENOSPC)', this, 'The root partition /dev/sda1 reaches 100% capacity. Application logging, temp file writes, and caches abort.')">
                                 <span class="spinner"></span> Fill Disk Space
                             </button>
                         </div>
@@ -768,8 +790,9 @@
                                     <span class="error-badge-cat cat-os">Filesystem</span>
                                 </div>
                                 <div class="error-card-sub">EEXIST: file already exists, lockfile conflict</div>
+                                <p class="error-card-desc">Stale .pid lockfile remains locked on disk, blocking the background worker daemon from booting.</p>
                             </div>
-                            <button class="error-trigger-btn" onclick="triggerError('/api/error/eexist', 'File Exists (EEXIST)', this)">
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/eexist', 'File Exists (EEXIST)', this, 'Stale .pid lockfile remains locked on disk, blocking the background worker daemon from booting.')">
                                 <span class="spinner"></span> Cause Lockfile Conflict
                             </button>
                         </div>
@@ -782,8 +805,9 @@
                                     <span class="error-badge-cat cat-os">OS Limit</span>
                                 </div>
                                 <div class="error-card-sub">EMFILE: too many open files (ulimit -n)</div>
+                                <p class="error-card-desc">System file descriptor limit (ulimit -n 1024) is breached, rejecting all incoming socket and disk handles.</p>
                             </div>
-                            <button class="error-trigger-btn" onclick="triggerError('/api/error/emfile', 'Too Many Open Files (EMFILE)', this)">
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/emfile', 'Too Many Open Files (EMFILE)', this, 'System file descriptor limit (ulimit -n 1024) is breached, rejecting all incoming socket and disk handles.')">
                                 <span class="spinner"></span> Exhaust Descriptors
                             </button>
                         </div>
@@ -796,8 +820,9 @@
                                     <span class="error-badge-cat cat-net">Network</span>
                                 </div>
                                 <div class="error-card-sub">HTTP 502: Upstream proxy connection failure</div>
+                                <p class="error-card-desc">Reverse proxy (NGINX/Cloudflare) received an invalid response, TCP reset, or timeout from the upstream app.</p>
                             </div>
-                            <button class="error-trigger-btn" onclick="triggerError('/api/error/bad-gateway', '502 Bad Gateway', this)">
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/bad-gateway', '502 Bad Gateway', this, 'Reverse proxy (NGINX/Cloudflare) received an invalid response, TCP reset, or timeout from the upstream app.')">
                                 <span class="spinner"></span> Drop Upstream Proxy
                             </button>
                         </div>
@@ -810,8 +835,9 @@
                                     <span class="error-badge-cat cat-net">Process</span>
                                 </div>
                                 <div class="error-card-sub">ProcessZombieException: PID 4092 &lt;defunct&gt;</div>
+                                <p class="error-card-desc">A dead child worker terminated without waitpid(), leaving an orphaned zombie process clogging the OS PID table.</p>
                             </div>
-                            <button class="error-trigger-btn" onclick="triggerError('/api/error/defunct', 'Defunct Zombie Process', this)">
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/defunct', 'Defunct Zombie Process', this, 'A dead child worker terminated without waitpid(), leaving an orphaned zombie process clogging the OS PID table.')">
                                 <span class="spinner"></span> Spawn Zombie Process
                             </button>
                         </div>
@@ -824,8 +850,9 @@
                                     <span class="error-badge-cat cat-net">Security</span>
                                 </div>
                                 <div class="error-card-sub">TLSError: CERT_HAS_EXPIRED on SSL handshake</div>
+                                <p class="error-card-desc">The x509 cryptographic certificate has passed its validity date, causing inbound HTTPS handshakes to fail.</p>
                             </div>
-                            <button class="error-trigger-btn" onclick="triggerError('/api/error/cert-expired', 'Certificate Expired', this)">
+                            <button class="error-trigger-btn" onclick="triggerError('/api/error/cert-expired', 'Certificate Expired', this, 'The x509 cryptographic certificate has passed its validity date, causing inbound HTTPS handshakes to fail.')">
                                 <span class="spinner"></span> Invalidate TLS Cert
                             </button>
                         </div>
@@ -914,7 +941,7 @@
         }
 
         // Trigger Simulated Error
-        async function triggerError(endpoint, errorTitle, btn) {
+        async function triggerError(endpoint, errorTitle, btn, fallbackDesc) {
             const spinner = btn.querySelector('.spinner');
             if (spinner) spinner.style.display = 'inline-block';
             btn.disabled = true;
@@ -943,6 +970,9 @@
                         message: res.status === 502
                             ? '502 Bad Gateway: Upstream reverse proxy failed to receive valid response from microservice upstream:5000'
                             : `HTTP ${res.status}: ${res.statusText || 'Server Error'}`,
+                        description: res.status === 502
+                            ? 'The reverse proxy (NGINX/Cloudflare) received an invalid response, TCP reset, or gateway timeout from the upstream service cluster.'
+                            : 'An unexpected response was returned by the upstream gateway or web service.',
                         logSnippet: res.status === 502 
                             ? 'HTTP/1.1 502 Bad Gateway: Upstream reverse proxy failed to receive valid response from microservice upstream:5000'
                             : `HTTP/1.1 ${res.status} ${res.statusText || 'Error'} from server`,
@@ -954,13 +984,17 @@
                 const isWarning = res.status === 200 && data.status === 'success';
                 const statusTypeClass = isWarning ? 'log-warn' : 'log-error';
                 const statusBadge = isWarning ? `[WARN ${data.statusCode || 200}]` : `[FAIL ${res.status || data.statusCode || 500}]`;
+                const description = data.description || fallbackDesc || 'Failure condition simulated.';
 
                 setSystemStatus(isWarning ? 'warning' : 'error');
 
                 // Update Incident Banner
                 banner.style.display = 'block';
                 bannerTitle.innerText = `🚨 INCIDENT: ${errorTitle.toUpperCase()} (${res.status || data.statusCode})`;
-                bannerMessage.innerText = data.logSnippet || data.message || 'Error occurred';
+                bannerMessage.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 4px;">${data.logSnippet || data.message || 'Error occurred'}</div>
+                    <div style="font-size: 0.8rem; color: #FECACA; opacity: 0.95;">📌 <em>${description}</em></div>
+                `;
 
                 // Append to Terminal Log Output
                 const entry = document.createElement('div');
@@ -969,7 +1003,8 @@
                     <span class="log-time">[${new Date().toLocaleTimeString()}]</span> 
                     <span class="${statusTypeClass}">${statusBadge} ${data.errorCode || 'ERR'}</span>
                     <div style="font-weight: 600; margin-top: 2px;">${data.message || 'Failure occurred'}</div>
-                    ${data.logSnippet ? `<div style="color: #F87171; font-size: 0.75rem; margin-top: 2px;">&gt;&gt; LOG STREAM (app.log): ${data.logSnippet}</div>` : ''}
+                    <div class="log-desc-box">💡 <strong>Overview:</strong> ${description}</div>
+                    ${data.logSnippet ? `<div style="color: #F87171; font-size: 0.75rem; margin-top: 4px;">&gt;&gt; LOG STREAM (app.log): ${data.logSnippet}</div>` : ''}
                     ${data.stack ? `<div class="log-stack">${data.stack}</div>` : ''}
                 `;
                 terminal.prepend(entry);
@@ -978,7 +1013,10 @@
                 setSystemStatus('error');
                 banner.style.display = 'block';
                 bannerTitle.innerText = `🚨 SYSTEM CRITICAL: ${errorTitle.toUpperCase()}`;
-                bannerMessage.innerText = 'Connection refused / Event loop locked up: ' + err.message;
+                bannerMessage.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 4px;">Connection refused / Event loop locked up: ${err.message}</div>
+                    <div style="font-size: 0.8rem; color: #FECACA;">📌 <em>The process thread has locked up completely, halting all network I/O.</em></div>
+                `;
 
                 const entry = document.createElement('div');
                 entry.className = 'log-entry';
@@ -986,6 +1024,7 @@
                     <span class="log-time">[${new Date().toLocaleTimeString()}]</span> 
                     <span class="log-error">[CRITICAL] SERVER_DEADLOCK</span>
                     <div style="font-weight: 600; margin-top: 2px;">Connection refused or process unresponsive (Deadlock / Crash).</div>
+                    <div class="log-desc-box">💡 <strong>Overview:</strong> The event loop is frozen in an infinite execution loop, rejecting all incoming socket connections.</div>
                 `;
                 terminal.prepend(entry);
             } finally {
